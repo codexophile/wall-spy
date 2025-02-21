@@ -12,7 +12,7 @@ LV.OnEvent("DoubleClick", ShowInExplorer)
 LV.OnEvent("ItemSelect", UpdatePreview)
 
 ; Create right panel for preview
-PreviewPic := MyGui.Add("Picture", "vPreview x+10 w400 h-1")
+PreviewPic := MyGui.Add("Picture", "vPreview x+10 w400 h400")
 
 ; Add buttons
 btnRefresh := MyGui.Add("Button", "xm y+10 w100", "Refresh List")
