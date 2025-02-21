@@ -12,7 +12,7 @@ LV.OnEvent("DoubleClick", ShowInExplorer)
 LV.OnEvent("ItemSelect", UpdatePreview)
 
 ; Create right panel for preview
-PreviewPic := MyGui.Add("Picture", "vPreview x+10 w400 h400")
+PreviewPic := MyGui.Add("Picture", "vPreview x+10 w400 h-1")
 
 ; Add buttons
 ButtonPanel := MyGui.Add("ListView", "xm y+10 w710 h40 -Hdr -E0x200", ["Buttons"])
@@ -115,6 +115,6 @@ GuiResize(thisGui, MinMax, Width, Height) {
 
   ; Resize controls
   LV.Move(, , 300, ListViewHeight)
-  PreviewPic.Move(, , PreviewWidth, ListViewHeight)
+  PreviewPic.Move(, , PreviewWidth, '-1')
   ButtonPanel.Move(, Height - ButtonPanelHeight - Padding, Width - (2 * Padding))
 }
