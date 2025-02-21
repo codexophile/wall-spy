@@ -15,10 +15,15 @@ LV.OnEvent("ItemSelect", UpdatePreview)
 PreviewPic := MyGui.Add("Picture", "vPreview x+10 w400 h-1")
 
 ; Add buttons
-ButtonPanel := MyGui.Add("ListView", "xm y+10 w710 h40 -Hdr -E0x200", ["Buttons"])
-ButtonPanel.Add(, "Refresh List|Show in Explorer|Delete Selected|Copy Path")
+btnRefresh := MyGui.Add("Button", "xm y+10 w100", "Refresh List")
+btnExplorer := MyGui.Add("Button", "x+10 w100", "Show in Explorer")
+btnDelete := MyGui.Add("Button", "x+10 w100", "Delete Selected")
+btnCopy := MyGui.Add("Button", "x+10 w100", "Copy Path")
 
-ButtonPanel.OnEvent("ItemSelect", HandleButton)
+btnRefresh.OnEvent("Click", RefreshList)
+btnExplorer.OnEvent("Click", ShowInExplorer)
+btnDelete.OnEvent("Click", DeleteSelected)
+btnCopy.OnEvent("Click", CopyPath)
 
 ; Initialize
 ImageCache := GetImageCache()
@@ -69,36 +74,31 @@ ShowInExplorer(*) {
   }
 }
 
-HandleButton(*) {
-  selected := ButtonPanel.GetNext()
-  ButtonPanel.Modify(selected, "-Select")  ; Deselect the button
+RefreshList(*) {
+  ImageCache := GetImageCache()
+  PopulateImageList()
+}
 
+DeleteSelected(*) {
   if (SelectedRow := LV.GetNext()) {
     imagePath := LV.GetText(SelectedRow)
-
-    switch selected {
-      case 1: ; Refresh
-        ImageCache := GetImageCache()
-        PopulateImageList()
-
-      case 2: ; Show in Explorer
-        ShowInExplorer()
-
-      case 3: ; Delete
-        try {
-          FileDelete(imagePath)
-          LV.Delete(SelectedRow)
-          ImageCache := GetImageCache() ; Refresh cache
-          PreviewPic.Value := "" ; Clear preview
-        } catch as e {
-          MsgBox("Error deleting file: " e.Message)
-        }
-
-      case 4: ; Copy Path
-        A_Clipboard := imagePath
-        ToolTip("Path copied to clipboard!")
-        SetTimer(() => ToolTip(), -1000)
+    try {
+      FileDelete(imagePath)
+      LV.Delete(SelectedRow)
+      ImageCache := GetImageCache() ; Refresh cache
+      PreviewPic.Value := "" ; Clear preview
+    } catch as e {
+      MsgBox("Error deleting file: " e.Message)
     }
+  }
+}
+
+CopyPath(*) {
+  if (SelectedRow := LV.GetNext()) {
+    imagePath := LV.GetText(SelectedRow)
+    A_Clipboard := imagePath
+    ToolTip("Path copied to clipboard!")
+    SetTimer(() => ToolTip(), -1000)
   }
 }
 
@@ -106,15 +106,21 @@ GuiResize(thisGui, MinMax, Width, Height) {
   if MinMax = -1    ; The window has been minimized
     return
 
-  ButtonPanelHeight := 40
+  ButtonHeight := 30
   Padding := 10
 
   ; Calculate new dimensions
-  ListViewHeight := Height - ButtonPanelHeight - (3 * Padding)
+  ListViewHeight := Height - ButtonHeight - (3 * Padding)
   PreviewWidth := Width - 300 - (3 * Padding)
 
   ; Resize controls
   LV.Move(, , 300, ListViewHeight)
   PreviewPic.Move(, , PreviewWidth, '-1')
-  ButtonPanel.Move(, Height - ButtonPanelHeight - Padding, Width - (2 * Padding))
+
+  ; Move buttons
+  btnY := Height - ButtonHeight - Padding
+  btnRefresh.Move(, btnY)
+  btnExplorer.Move(, btnY)
+  btnDelete.Move(, btnY)
+  btnCopy.Move(, btnY)
 }
